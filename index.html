@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Uploader</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css"
+    />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      #file {
+        display: none;
+      }
+    </style>
+  </head>
+  <body ondrop="drop(event)" ondragover="dragOver(event)">
+    <div class="mdl-grid">
+      <div
+        class="demo-card-wide mdl-card mdl-shadow--2dp mdl-cell mdl-cell--4-col mdl-cell--4-offset"
+      >
+        <div class="mdl-card__title">
+          <h2 class="mdl-card__title-text">Select zip file to upload</h2>
+        </div>
+        <div class="mdl-card__supporting-text">
+          Upload a zip file with music which is automatically unzipped and
+          imported into your beets library.
+        </div>
+        <div class="mdl-card__actions mdl-card--border">
+          <input type="file" id="file" accept=".zip" oninput="click()" />
+          <a
+            id="uploadButton"
+            onclick="document.getElementById('file').click()"
+            class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+            style="display: flex; align-items: center"
+          >
+            Upload file
+            <span
+              id="uploadSpinner"
+              uploadSpinner
+              class="mdl-spinner mdl-js-spinner is-active"
+              style="margin-left: 1em; display: none"
+            ></span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+      function mask(mask) {
+        if (mask) {
+          document
+            .getElementById("uploadButton")
+            .setAttribute("disabled", "disabled");
+          document.getElementById("uploadSpinner").style.display = "block";
+        } else {
+          document.getElementById("uploadButton").removeAttribute("disabled");
+          document.getElementById("uploadSpinner").style.display = "none";
+        }
+      }
+
+      function click() {
+        let fileField = document.getElementById("file");
+        upload(fileField.files[0]);
+        fileField.value = null;
+      }
+
+      function dragOver(event) {
+        event.preventDefault();
+      }
+
+      function drop(event) {
+        event.preventDefault();
+        if (event.dataTransfer.items) {
+          upload(event.dataTransfer.items[0].getAsFile());
+        }
+      }
+
+      function upload(file) {
+        mask(true);
+        var formData = new FormData();
+        formData.append("file", file);
+        fetch("/upload", { method: "post", body: formData })
+          .then(() => {
+            toastr.success("File uploaded");
+            mask(false);
+          })
+          .catch(() => {
+            toastr.error("File upload failed");
+            mask(false);
+          });
+      }
+    </script>
+  </body>
+</html>
