@@ -33,7 +33,7 @@ class handler(BaseHTTPRequestHandler):
             shutil.unpack_archive(zipFileName, tempDir)
             os.remove(zipFileName)
 
-            os.system('beet import {0}'.format(tempfile.tempdir))
+            os.system('beet import -mq --group-albums {0}'.format(tempfile.tempdir))
 
         self.send_response(200)
         self.end_headers()
